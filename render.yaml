@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: aiou-hostel-portal
+    env: docker
+    plan: free
+    region: singapore
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: HOSTEL_DB_URL
+        sync: false
+      - key: HOSTEL_DB_USER
+        sync: false
+      - key: HOSTEL_DB_PASSWORD
+        sync: false

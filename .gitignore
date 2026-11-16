@@ -1,0 +1,10 @@
+target/
+dist/
+mingit/
+mingit.zip
+*.exe
+*.zip
+*.log
+PUBLIC_MOBILE_URL.txt
+.idea/
+*.iml
