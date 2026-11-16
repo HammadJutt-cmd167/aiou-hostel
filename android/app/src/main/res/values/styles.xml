@@ -1,0 +1,6 @@
+<resources>
+    <style name="Theme.AIOUHostel" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:statusBarColor">#18181C</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

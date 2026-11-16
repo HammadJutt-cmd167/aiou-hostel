@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AIOU Hostel Management</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <meta name="theme-color" content="#9333EA">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    :root {
+      --bg: #F5F6FA;
+      --sidebar: #18181C;
+      --sidebar-card: #22232A;
+      --sidebar-text: #A5A8B4;
+      --card: #FFFFFF;
+      --border: #ECEFF4;
+      --text-dark: #18191E;
+      --text-muted: #7D8291;
+      --primary: #9333EA;
+      --lime: #E2F992;
+      --lime-dark: #3F6212;
+      --blue: #BAE6FD;
+      --blue-dark: #0E7490;
+      --purple: #D8C4FF;
+      --purple-dark: #5B21B6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text-dark); min-height: 100vh; display: flex; flex-direction: column; }
+    
+    /* Install Banner */
+    #installBanner { background: var(--sidebar); color: white; padding: 10px 16px; display: none; align-items: center; justify-content: space-between; font-size: 13px; border-bottom: 2px solid var(--primary); }
+    #installBanner button { background: var(--primary); color: white; border: none; padding: 6px 14px; border-radius: 20px; font-weight: 700; cursor: pointer; }
+    
+    /* App Container */
+    .app-layout { display: flex; flex: 1; height: 100vh; overflow: hidden; }
+    @media(max-width: 768px) { .app-layout { flex-direction: column; height: auto; min-height: 100vh; } }
+    
+    /* Sidebar */
+    .sidebar { width: 250px; background: var(--sidebar); padding: 24px 18px; display: flex; flex-direction: column; justify-content: space-between; }
+    @media(max-width: 768px) { .sidebar { width: 100%; padding: 14px 16px; flex-direction: row; align-items: center; } }
+    
+    .brand { display: flex; align-items: center; gap: 8px; color: white; font-weight: 800; font-size: 19px; }
+    .diamond { width: 20px; height: 20px; background: #DBF76B; border-radius: 6px; }
+    .badge-tag { font-size: 10px; color: #C4AFFA; font-weight: 700; margin-left: 4px; }
+    
+    .nav-links { list-style: none; margin-top: 24px; }
+    @media(max-width: 768px) { .nav-links { display: none; } }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; color: var(--sidebar-text); font-weight: 600; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: 0.2s; }
+    .nav-item:hover, .nav-item.active { background: white; color: var(--text-dark); }
+    
+    /* Mobile Nav Bar */
+    .mobile-nav { display: none; background: white; border-top: 1px solid var(--border); position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; justify-content: space-around; padding: 8px 0; }
+    @media(max-width: 768px) { .mobile-nav { display: flex; } }
+    .mob-tab { text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted); cursor: pointer; text-decoration: none; flex: 1; }
+    .mob-tab.active { color: var(--primary); }
+    .mob-tab span { display: block; font-size: 18px; margin-bottom: 2px; }
+    
+    /* Main Content */
+    .main-view { flex: 1; overflow-y: auto; padding: 24px 28px; padding-bottom: 80px; }
+    @media(max-width: 768px) { .main-view { padding: 16px; padding-bottom: 90px; } }
+    
+    /* Cards & Stats */
+    .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { border-radius: 18px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
+    .stat-card.blue { background: var(--blue); color: var(--blue-dark); }
+    .stat-card.lime { background: var(--lime); color: var(--lime-dark); }
+    .stat-card.purple { background: var(--purple); color: var(--purple-dark); }
+    .stat-icon { width: 44px; height: 44px; background: white; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .stat-info .title { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
+    .stat-info .val { font-size: 20px; font-weight: 800; color: var(--text-dark); }
+    
+    .content-box { background: white; border-radius: 18px; border: 1px solid var(--border); padding: 20px; margin-bottom: 24px; }
+    .box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .box-title { font-size: 16px; font-weight: 700; }
+    
+    /* Buttons */
+    .btn-action { background: var(--sidebar); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.2s; }
+    .btn-action:hover { opacity: 0.9; }
+    .btn-green { background: #16A34A; color: white; }
+    .btn-purple { background: var(--primary); color: white; }
+    .btn-red { background: #DC2626; color: white; }
+    
+    /* Tables */
+    .table-resp { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+    th { padding: 10px 12px; color: var(--text-muted); font-size: 11px; font-weight: 700; border-bottom: 1px solid var(--border); }
+    td { padding: 12px; border-bottom: 1px solid #F3F4F6; color: var(--text-dark); }
+    
+    /* Badges */
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+    .badge-active, .badge-resolved, .badge-available { background: #DCFCE7; color: #166534; }
+    .badge-open, .badge-unpaid, .badge-occupied { background: #FEE2E2; color: #991B1B; }
+    .badge-pending { background: #FEF3C7; color: #92400E; }
+    
+    /* Forms & Modal */
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--text-dark); }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; outline: none; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; padding: 16px; }
+    .modal { background: white; border-radius: 20px; max-width: 440px; width: 100%; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+    
+    /* Login screen */
+    #loginScreen { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 300; padding: 16px; }
+    .login-card { background: white; border-radius: 20px; max-width: 400px; width: 100%; padding: 32px 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); text-align: center; }
+  </style>
+</head>
+<body>
+
+  <!-- Install Banner for Mobile -->
+  <div id="installBanner">
+    <div>📱 <b>Install Hostel App</b> on your phone for quick access!</div>
+    <button id="btnInstallPwa">Install App</button>
+  </div>
+
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen">
+    <div class="login-card">
+      <div class="diamond" style="margin: 0 auto 12px; width: 28px; height: 28px;"></div>
+      <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 4px;">AIOU Hostel Management</h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 22px;">Student Portal (Allama Iqbal Open University)</p>
+      
+      <div class="form-group" style="text-align: left;">
+        <label>Student Roll No / Email</label>
+        <input type="text" id="loginUser" placeholder="e.g. 0001072084" autofocus>
+      </div>
+      <div class="form-group" style="text-align: left;">
+        <label>Password (Default: 123456)</label>
+        <input type="password" id="loginPass" placeholder="Password">
+      </div>
+      
+      <button class="btn-action btn-purple" style="width: 100%; padding: 12px; font-size: 14px; margin-top: 10px;" onclick="doLogin()">Sign In</button>
+
+      <div style="margin-top: 14px; text-align: center;">
+        <a href="javascript:void(0)" onclick="configureServerUrl()" style="color: var(--primary); font-size: 11px; font-weight: 600; text-decoration: none;">âš™ï¸  Change Server Connection (<span id="curServerSpan"></span>)</a>
+      </div>
+
+      
+      <div style="margin-top: 18px; font-size: 12px;">
+        <a href="#" onclick="showRegisterModal()" style="color: var(--primary); font-weight: 700; text-decoration: none;">New student? Register here →</a>
+      </div>
+      <div style="margin-top: 14px; font-size: 11px; color: var(--text-muted);">
+        Default password for existing students is: <b>123456</b>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP LAYOUT -->
+  <div class="app-layout" id="appLayout" style="display: none;">
+    <div class="sidebar">
+      <div>
+        <div class="brand">
+          <div class="diamond"></div>
+          AIOU HOSTEL
+          <span class="badge-tag">PORTAL</span>
+        </div>
+        <div style="background: var(--sidebar-card); border-radius: 12px; padding: 10px; margin-top: 18px; color: white;">
+          <div id="sideName" style="font-weight: 700; font-size: 13px;">Student Name</div>
+          <div id="sideRoll" style="font-size: 11px; color: var(--sidebar-text);">Roll No • BSCS</div>
+        </div>
+        <ul class="nav-links">
+          <li class="nav-item active" onclick="showTab('overview')">📊 Overview</li>
+          <li class="nav-item" onclick="showTab('room')">🛏️ Room &amp; Booking</li>
+          <li class="nav-item" onclick="showTab('complaints')">💬 Complaints</li>
+          <li class="nav-item" onclick="showTab('fee')">💳 Fee Status</li>
+          <li class="nav-item" onclick="showTab('profile')">👤 My Profile</li>
+          <li class="nav-item" onclick="window.open('/download', '_blank')">📥 Download App</li>
+        </ul>
+      </div>
+      <div style="text-align: left;">
+        <button class="btn-action btn-red" style="width: 100%;" onclick="doLogout()">🚪 Sign Out</button>
+      </div>
+    </div>
+
+    <!-- Main Views -->
+    <div class="main-view">
+      
+      <!-- TAB 1: OVERVIEW -->
+      <div id="tab-overview">
+        <div style="margin-bottom: 20px;">
+          <h2 id="greetTitle" style="font-size: 22px; font-weight: 800;">Welcome back</h2>
+          <p id="greetSub" style="color: var(--text-muted); font-size: 13px;">Hostel Resident Portal</p>
+        </div>
+        <div class="stat-row">
+          <div class="stat-card blue" onclick="showTab('room')">
+            <div class="stat-icon">🛏️</div>
+            <div class="stat-info">
+              <div class="title">Allocated Room</div>
+              <div class="val" id="statRoom">Loading...</div>
+            </div>
+          </div>
+          <div class="stat-card lime" onclick="showTab('complaints')">
+            <div class="stat-icon">💬</div>
+            <div class="stat-info">
+              <div class="title">My Complaints</div>
+              <div class="val" id="statComp">0 Open</div>
+            </div>
+          </div>
+          <div class="stat-card purple" onclick="showTab('fee')">
+            <div class="stat-icon">💳</div>
+            <div class="stat-info">
+              <div class="title">Total Fee Paid</div>
+              <div class="val" id="statFee">Rs. 0</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="content-box">
+          <div class="box-header">
+            <div class="box-title">Recent Complaints Status</div>
+            <button class="btn-action btn-green" onclick="showModal('complaintModal')">+ Lodge Complaint</button>
+          </div>
+          <div class="table-resp">
+            <table id="recentCompTable">
+              <thead><tr><th>Category</th><th>Subject</th><th>Status</th><th>Date</th></tr></thead>
+              <tbody><tr><td colspan="4" style="text-align:center;">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: ROOM & BOOKING -->
+      <div id="tab-room" style="display:none;">
+        <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 16px;">My Room &amp; Hostel Booking</h2>
+        <div class="content-box" id="curRoomCard">
+          <div class="box-header">
+            <div class="box-title">Current Room Allocation</div>
+          </div>
+          <div id="curRoomDetails">Loading...</div>
+        </div>
+        
+        <div class="content-box">
+          <div class="box-header">
+            <div class="box-title">Available Hostel Rooms (Select &amp; Book)</div>
+          </div>
+          <div class="table-resp">
+            <table id="availRoomsTable">
+              <thead><tr><th>Room No</th><th>Type</th><th>Floor</th><th>Rent (Rs)</th><th>Action</th></tr></thead>
+              <tbody><tr><td colspan="5" style="text-align:center;">Loading available rooms...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: COMPLAINTS -->
+      <div id="tab-complaints" style="display:none;">
+        <div class="box-header" style="margin-bottom: 16px;">
+          <h2 style="font-size: 22px; font-weight: 800;">My Complaints</h2>
+          <button class="btn-action btn-green" onclick="showModal('complaintModal')">+ Lodge Complaint</button>
+        </div>
+        <div class="content-box">
+          <div class="table-resp">
+            <table id="allCompTable">
+              <thead><tr><th>Category</th><th>Subject</th><th>Details</th><th>Status</th><th>Submitted</th></tr></thead>
+              <tbody><tr><td colspan="5" style="text-align:center;">Loading complaints...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: FEE & PAYMENTS -->
+      <div id="tab-fee" style="display:none;">
+        <div class="box-header" style="margin-bottom: 16px;">
+          <h2 style="font-size: 22px; font-weight: 800;">Fee &amp; Payment History</h2>
+          <button class="btn-action btn-purple" onclick="showModal('paymentModal')">+ Report Payment</button>
+        </div>
+        <div class="content-box">
+          <div class="table-resp">
+            <table id="paymentsTable">
+              <thead><tr><th>Month</th><th>Amount</th><th>Method</th><th>Reference No</th><th>Date</th></tr></thead>
+              <tbody><tr><td colspan="5" style="text-align:center;">Loading payment history...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: PROFILE -->
+      <div id="tab-profile" style="display:none;">
+        <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 16px;">My Profile &amp; Settings</h2>
+        <div class="content-box">
+          <div class="box-title" style="margin-bottom: 14px;">Personal Information</div>
+          <div id="profInfoGrid" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; font-size: 13px;"></div>
+        </div>
+        <div class="content-box">
+          <div class="box-title" style="margin-bottom: 14px;">Change Password</div>
+          <div class="form-group"><label>Current Password</label><input type="password" id="pCur"></div>
+          <div class="form-group"><label>New Password</label><input type="password" id="pNew"></div>
+          <div class="form-group"><label>Confirm New Password</label><input type="password" id="pConf"></div>
+          <button class="btn-action btn-purple" onclick="doChangePassword()">Update Password</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom Mobile Navigation -->
+  <div class="mobile-nav">
+    <a class="mob-tab active" id="mob-overview" onclick="showTab('overview')"><span>📊</span>Overview</a>
+    <a class="mob-tab" id="mob-room" onclick="showTab('room')"><span>🛏️</span>Room</a>
+    <a class="mob-tab" id="mob-complaints" onclick="showTab('complaints')"><span>💬</span>Complaints</a>
+    <a class="mob-tab" id="mob-fee" onclick="showTab('fee')"><span>💳</span>Fees</a>
+    <a class="mob-tab" id="mob-profile" onclick="showTab('profile')"><span>👤</span>Profile</a>
+  </div>
+
+  <!-- MODAL: LODGE COMPLAINT -->
+  <div class="modal-overlay" id="complaintModal">
+    <div class="modal">
+      <h3 style="margin-bottom: 16px;">💬 Lodge a Complaint</h3>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="cCat">
+          <option>Maintenance</option>
+          <option>Cleanliness</option>
+          <option>Food &amp; Mess</option>
+          <option>Electricity &amp; Lights</option>
+          <option>Water Supply</option>
+          <option>Security</option>
+          <option>Internet &amp; Wi-Fi</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Subject</label>
+        <input type="text" id="cSub" placeholder="Brief summary of the issue">
+      </div>
+      <div class="form-group">
+        <label>Details</label>
+        <textarea id="cDet" rows="3" placeholder="Detailed explanation..."></textarea>
+      </div>
+      <div style="display:flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn-action" style="background:#E5E7EB; color:#374151;" onclick="hideModal('complaintModal')">Cancel</button>
+        <button class="btn-action btn-green" onclick="doSubmitComplaint()">Submit Complaint</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: REPORT PAYMENT -->
+  <div class="modal-overlay" id="paymentModal">
+    <div class="modal">
+      <h3 style="margin-bottom: 16px;">💳 Report Fee Payment</h3>
+      <div class="form-group"><label>Amount (Rs)</label><input type="number" id="payAmt" value="12000"></div>
+      <div class="form-group"><label>Month For</label><input type="text" id="payMonth" value="November 2026"></div>
+      <div class="form-group"><label>Payment Date</label><input type="date" id="payDate"></div>
+      <div class="form-group">
+        <label>Payment Method</label>
+        <select id="payMethod">
+          <option>Bank Transfer</option>
+          <option>Online / EasyPaisa / JazzCash</option>
+          <option>Cash</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Receipt / Reference No</label><input type="text" id="payRef" placeholder="e.g. TRX198273"></div>
+      <div style="display:flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn-action" style="background:#E5E7EB; color:#374151;" onclick="hideModal('paymentModal')">Cancel</button>
+        <button class="btn-action btn-purple" onclick="doSubmitPayment()">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTER NEW STUDENT -->
+  <div class="modal-overlay" id="registerModal">
+    <div class="modal">
+      <h3 style="margin-bottom: 16px;">🎓 Student Registration</h3>
+      <div class="form-group"><label>Roll / Reg No *</label><input type="text" id="rNo" placeholder="e.g. 0001072085"></div>
+      <div class="form-group"><label>Full Name *</label><input type="text" id="rName" placeholder="Full Name"></div>
+      <div class="form-group"><label>Department</label><input type="text" id="rDept" value="BSCS"></div>
+      <div class="form-group"><label>Phone</label><input type="text" id="rPhone"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="rEmail"></div>
+      <div class="form-group"><label>Password *</label><input type="password" id="rPass"></div>
+      <div style="display:flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn-action" style="background:#E5E7EB; color:#374151;" onclick="hideModal('registerModal')">Cancel</button>
+        <button class="btn-action btn-purple" onclick="doRegister()">Register Account</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+    const DEFAULT_HOST = 'http://192.168.18.65:8080';
+    let API_BASE = localStorage.getItem('hostel_api_url') || DEFAULT_HOST;
+
+    function configureServerUrl() {
+      const curr = localStorage.getItem('hostel_api_url') || DEFAULT_HOST;
+      const newUrl = prompt('Enter Hostel Server URL (e.g. http://192.168.18.65:8080 or online URL):', curr);
+      if (newUrl && newUrl.trim()) {
+        const cleaned = newUrl.trim().replace(/\/+$/, '');
+        localStorage.setItem('hostel_api_url', cleaned);
+        API_BASE = cleaned;
+        const sp = document.getElementById('curServerSpan');
+        if (sp) sp.innerText = API_BASE;
+        alert('Server URL set to:\n' + API_BASE);
+      }
+    }
+
+    let session = JSON.parse(localStorage.getItem('hostel_session') || 'null');
+    let deferredPrompt = null;
+
+    // Register Service Worker for PWA / WebAPK
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(console.error);
+    }
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('installBanner').style.display = 'flex';
+    });
+
+    document.getElementById('btnInstallPwa').addEventListener('click', () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          document.getElementById('installBanner').style.display = 'none';
+          deferredPrompt = null;
+        });
+      }
+    });
+
+    document.getElementById('payDate').value = new Date().toISOString().split('T')[0];
+
+    if (session) {
+      showApp();
+    }
+
+    function showModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function hideModal(id) { document.getElementById(id).style.display = 'none'; }
+    function showRegisterModal() { showModal('registerModal'); }
+
+    async function doLogin() {
+      const u = document.getElementById('loginUser').value.trim();
+      const p = document.getElementById('loginPass').value;
+      if (!u || !p) return alert('Please enter Roll No and Password.');
+      const res = await fetch(API_BASE + '/api/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({roll: u, pass: p})
+      });
+      const data = await res.json();
+      if (data.success) {
+        session = data.session;
+        localStorage.setItem('hostel_session', JSON.stringify(session));
+        showApp();
+      } else {
+        alert(data.message || 'Login failed.');
+      }
+    }
+
+    async function doRegister() {
+      const no = document.getElementById('rNo').value.trim();
+      const name = document.getElementById('rName').value.trim();
+      const dept = document.getElementById('rDept').value.trim();
+      const phone = document.getElementById('rPhone').value.trim();
+      const email = document.getElementById('rEmail').value.trim();
+      const pass = document.getElementById('rPass').value;
+      if (!no || !name || !pass) return alert('Roll No, Name and Password are required.');
+      const res = await fetch(API_BASE + '/api/register', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({studentNo: no, fullName: name, department: dept, phone, email, password: pass})
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Account registered successfully! Please sign in.');
+        hideModal('registerModal');
+        document.getElementById('loginUser').value = no;
+      } else {
+        alert(data.message || 'Registration failed.');
+      }
+    }
+
+    function doLogout() {
+      localStorage.removeItem('hostel_session');
+      session = null;
+      document.getElementById('appLayout').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+    }
+
+    function showApp() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appLayout').style.display = 'flex';
+      document.getElementById('sideName').innerText = session.fullName;
+      document.getElementById('sideRoll').innerText = session.studentNo + ' • ' + (session.department || 'AIOU');
+      document.getElementById('greetTitle').innerText = 'Welcome, ' + session.fullName;
+      document.getElementById('greetSub').innerText = 'Roll No: ' + session.studentNo + ' • ' + session.department;
+      loadOverview();
+    }
+
+    function showTab(t) {
+      ['overview', 'room', 'complaints', 'fee', 'profile'].forEach(id => {
+        document.getElementById('tab-' + id).style.display = (id === t ? 'block' : 'none');
+        const mob = document.getElementById('mob-' + id);
+        if (mob) mob.className = (id === t ? 'mob-tab active' : 'mob-tab');
+      });
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      if (t === 'overview') loadOverview();
+      if (t === 'room') loadRooms();
+      if (t === 'complaints') loadComplaints();
+      if (t === 'fee') loadPayments();
+      if (t === 'profile') loadProfile();
+    }
+
+    async function loadOverview() {
+      const res = await fetch(API_BASE + '/api/overview?studentId=' + session.id);
+      const data = await res.json();
+      document.getElementById('statRoom').innerText = data.room || 'None';
+      document.getElementById('statComp').innerText = data.openComplaints + ' Open';
+      document.getElementById('statFee').innerText = 'Rs. ' + Number(data.totalPaid).toLocaleString();
+      
+      const tb = document.querySelector('#recentCompTable tbody');
+      if (!data.recentComplaints || data.recentComplaints.length === 0) {
+        tb.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#9CA3AF;">No complaints registered yet.</td></tr>';
+      } else {
+        tb.innerHTML = data.recentComplaints.map(c => `
+          <tr>
+            <td><b>${c.category}</b></td>
+            <td>${c.subject}</td>
+            <td><span class="badge badge-${c.status.toLowerCase()}">${c.status}</span></td>
+            <td>${c.date}</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    async function loadRooms() {
+      const res = await fetch(API_BASE + '/api/rooms?studentId=' + session.id);
+      const data = await res.json();
+      
+      const curDiv = document.getElementById('curRoomDetails');
+      if (data.currentAllocation) {
+        const a = data.currentAllocation;
+        curDiv.innerHTML = `
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 14px;">
+            <div><span style="font-size:11px; color:#6B7280;">Room</span><br><b>Room ${a.room_no}</b></div>
+            <div><span style="font-size:11px; color:#6B7280;">Type / Bed</span><br><b>${a.room_type} (${a.bed_no})</b></div>
+            <div><span style="font-size:11px; color:#6B7280;">Monthly Fee</span><br><b>Rs. ${Number(a.monthly_fee).toLocaleString()}</b></div>
+            <div><span style="font-size:11px; color:#6B7280;">Allocated Since</span><br><b>${a.start_date}</b></div>
+          </div>
+          <button class="btn-action btn-red" onclick="doVacateRoom(${a.id})">Vacate / Checkout Room</button>
+        `;
+      } else {
+        curDiv.innerHTML = '<p style="color:#D97706;">⚠️ You currently have no allocated room. Book an available room below.</p>';
+      }
+      
+      const tb = document.querySelector('#availRoomsTable tbody');
+      if (!data.rooms || data.rooms.length === 0) {
+        tb.innerHTML = '<tr><td colspan="5" style="text-align:center;">No rooms currently available.</td></tr>';
+      } else {
+        tb.innerHTML = data.rooms.map(r => `
+          <tr>
+            <td><b>Room ${r.room_no}</b></td>
+            <td>${r.room_type}</td>
+            <td>${r.floor_no || '1st'}</td>
+            <td>Rs. ${Number(r.monthly_fee).toLocaleString()}</td>
+            <td><button class="btn-action btn-purple" onclick="doBookRoom(${r.id}, '${r.room_no}')">Book Room</button></td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    async function doBookRoom(roomId, roomNo) {
+      if (!confirm('Confirm booking Room ' + roomNo + '?')) return;
+      const res = await fetch(API_BASE + '/api/book-room', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({studentId: session.id, roomId: roomId, bedNo: 'Bed 1'})
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('🎉 Room ' + roomNo + ' booked successfully!');
+        loadRooms();
+      } else {
+        alert(data.message || 'Booking failed.');
+      }
+    }
+
+    async function doVacateRoom(allocId) {
+      if (!confirm('Are you sure you want to vacate this room?')) return;
+      const res = await fetch(API_BASE + '/api/vacate-room', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({allocId: allocId})
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Room vacated.');
+        loadRooms();
+      }
+    }
+
+    async function loadComplaints() {
+      const res = await fetch(API_BASE + '/api/complaints?studentId=' + session.id);
+      const list = await res.json();
+      const tb = document.querySelector('#allCompTable tbody');
+      if (!list || list.length === 0) {
+        tb.innerHTML = '<tr><td colspan="5" style="text-align:center;">No complaints submitted yet.</td></tr>';
+      } else {
+        tb.innerHTML = list.map(c => `
+          <tr>
+            <td><b>${c.category}</b></td>
+            <td>${c.subject}</td>
+            <td>${c.details || '-'}</td>
+            <td><span class="badge badge-${c.status.toLowerCase()}">${c.status}</span></td>
+            <td>${c.date}</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    async function doSubmitComplaint() {
+      const cat = document.getElementById('cCat').value;
+      const sub = document.getElementById('cSub').value.trim();
+      const det = document.getElementById('cDet').value.trim();
+      if (!sub) return alert('Please enter subject.');
+      const res = await fetch(API_BASE + '/api/complaints', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({studentId: session.id, category: cat, subject: sub, details: det})
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Complaint submitted successfully!');
+        hideModal('complaintModal');
+        document.getElementById('cSub').value = '';
+        document.getElementById('cDet').value = '';
+        loadComplaints();
+      }
+    }
+
+    async function loadPayments() {
+      const res = await fetch(API_BASE + '/api/payments?studentId=' + session.id);
+      const list = await res.json();
+      const tb = document.querySelector('#paymentsTable tbody');
+      if (!list || list.length === 0) {
+        tb.innerHTML = '<tr><td colspan="5" style="text-align:center;">No payment transactions recorded yet.</td></tr>';
+      } else {
+        tb.innerHTML = list.map(p => `
+          <tr>
+            <td>${p.month || '-'}</td>
+            <td><b>Rs. ${Number(p.amount).toLocaleString()}</b></td>
+            <td>${p.method}</td>
+            <td>${p.reference || '-'}</td>
+            <td>${p.date}</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    async function doSubmitPayment() {
+      const amt = document.getElementById('payAmt').value;
+      const month = document.getElementById('payMonth').value;
+      const date = document.getElementById('payDate').value;
+      const method = document.getElementById('payMethod').value;
+      const ref = document.getElementById('payRef').value.trim();
+      const res = await fetch(API_BASE + '/api/payments', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({studentId: session.id, amount: amt, month: month, date: date, method: method, ref: ref})
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Payment reported successfully!');
+        hideModal('paymentModal');
+        loadPayments();
+      }
+    }
+
+    function loadProfile() {
+      const pGrid = document.getElementById('profInfoGrid');
+      pGrid.innerHTML = `
+        <div><span style="color:#6B7280; font-size:11px;">Full Name</span><br><b>${session.fullName}</b></div>
+        <div><span style="color:#6B7280; font-size:11px;">Roll / Reg No</span><br><b>${session.studentNo}</b></div>
+        <div><span style="color:#6B7280; font-size:11px;">Department</span><br><b>${session.department || 'AIOU'}</b></div>
+        <div><span style="color:#6B7280; font-size:11px;">Gender</span><br><b>${session.gender || 'N/A'}</b></div>
+        <div><span style="color:#6B7280; font-size:11px;">Phone</span><br><b>${session.phone || 'N/A'}</b></div>
+        <div><span style="color:#6B7280; font-size:11px;">Email</span><br><b>${session.email || 'N/A'}</b></div>
+      `;
+    }
+
+    async function doChangePassword() {
+      const cur = document.getElementById('pCur').value;
+      const nw = document.getElementById('pNew').value;
+      const conf = document.getElementById('pConf').value;
+      if (!nw) return alert('Enter new password.');
+      if (nw !== conf) return alert('Passwords do not match.');
+      const res = await fetch(API_BASE + '/api/change-password', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({studentId: session.id, oldPass: cur, newPass: nw})
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Password changed successfully!');
+        document.getElementById('pCur').value = '';
+        document.getElementById('pNew').value = '';
+        document.getElementById('pConf').value = '';
+      } else {
+        alert(data.message || 'Error changing password.');
+      }
+    }
+  </script>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const sp = document.getElementById('curServerSpan');
+      if (sp) sp.innerText = API_BASE.replace('http://', '');
+    });
+</script>
+</body>
+</html>
