@@ -38,6 +38,7 @@ public class WebServer {
             server.createContext("/icon-192.png", new IconHandler(192));
             server.createContext("/icon-512.png", new IconHandler(512));
             server.createContext("/download", new DownloadPageHandler());
+            server.createContext("/download/apk", new FileDownloadHandler("AIOU_Hostel_Management.apk", "AIOU_Hostel_Management.apk", "application/vnd.android.package-archive"));
             server.createContext("/download/windows", new FileDownloadHandler("target/HostelApp-Windows.zip", "HostelManagementSystem-Windows.zip", "application/zip"));
             server.createContext("/download/jar", new FileDownloadHandler("target/HostelApp.jar", "HostelApp.jar", "application/java-archive"));
 
@@ -533,10 +534,10 @@ public class WebServer {
                     "    <div class=\"grid\">\n" +
                     "      <div class=\"card\">\n" +
                     "        <div>\n" +
-                    "          <h3>📱 Mobile (Android / iPhone)</h3>\n" +
-                    "          <p>Install the official AIOU Hostel Student App directly on your mobile phone without downloading bulky APKs.</p>\n" +
+                    "          <h3>📱 Mobile (Android APK)</h3>\n" +
+                    "          <p>Official Android App (.apk) for AIOU Hostel Management. Install directly on any Android phone.</p>\n" +
                     "        </div>\n" +
-                    "        <a href=\"/\" class=\"btn btn-purple\">Open Mobile Portal &amp; Install</a>\n" +
+                    "        <a href=\"/download/apk\" class=\"btn btn-purple\">Download Android App (.apk)</a>\n" +
                     "      </div>\n" +
                     "      \n" +
                     "      <div class=\"card blue\">\n" +
